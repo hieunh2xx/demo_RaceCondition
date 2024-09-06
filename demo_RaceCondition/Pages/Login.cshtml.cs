@@ -23,28 +23,50 @@ namespace demo_RaceCondition.Pages
             var user = _userService.Login(Email, Password);
             if (user == null)
             {
-                string message = UpdateLoginTimeAttemp() > 10 ? "You haved login fail for many time, try again after " : "Invalid login attempt.";
-                ViewData["Mesage"] = message;
-                ModelState.AddModelError("", message);
+                ViewData["Message"] = "Invalid username or password";
+                UpdateLoginTimeAttemp();
                 return Page();
             }
+
+            HttpContext.Session.Remove("LoginTimeAttemp");
+            HttpContext.Session.Remove("StartTime");
             HttpContext.Session.SetInt32("CurrentUserId", user.Id);
             HttpContext.Session.SetString("CurrentUserName", user.Name.ToString());
+
             return RedirectToPage("/Index");
         }
 
-        public int UpdateLoginTimeAttemp()
+        public void UpdateLoginTimeAttemp()
         {
             int? timeLogin = HttpContext.Session.GetInt32("LoginTimeAttemp");
-            if (timeLogin == null)
+            if (!timeLogin.HasValue)
             {
                 HttpContext.Session.SetInt32("LoginTimeAttemp", 1);
-                return 1;
+
+            }
+            else if (timeLogin.Value < 10)
+            {
+                HttpContext.Session.SetInt32("LoginTimeAttemp", timeLogin.Value + 1);
             }
             else
             {
-                HttpContext.Session.SetInt32("LoginTimeAttemp", timeLogin.Value + 1);
-                return timeLogin.Value + 1;
+                var startTimeRaw = HttpContext.Session.GetString("StartTime");
+                if (startTimeRaw == null)
+                {
+                    HttpContext.Session.SetString("StartTime", DateTime.Now.ToString());
+                    ViewData["Message"] = "You have login fail many time, try again after 60s";
+                }
+                else
+                {
+                    int remainTime = (DateTime.Now - DateTime.Parse(startTimeRaw)).Seconds;
+                    if (remainTime > 60)
+                    {
+                        HttpContext.Session.Remove("LoginTimeAttemp");
+                        HttpContext.Session.Remove("StartTime");
+                        ViewData["Message"] = $"You have login fail many time, try again after {60 - remainTime}s";
+
+                    }
+                }
             }
         }
     }
