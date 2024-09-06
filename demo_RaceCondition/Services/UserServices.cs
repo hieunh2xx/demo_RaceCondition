@@ -1,57 +1,92 @@
-﻿// Services/UserService.cs
-using demo_RaceCondition.Models;
+﻿using demo_RaceCondition.Models;
 using System.Collections.Generic;
 using System.Linq;
 
 public class UserService
 {
-    private readonly List<User> _users = new();
-    private User _currentUser;
+    private readonly demo_bypassContext _context;
+    private Acccount _currentUser;
 
-    public UserService()
+    public UserService(demo_bypassContext context)
     {
-        // Khởi tạo dữ liệu giả
-        _users.Add(new User { Id = 1,Name="admin",Password="123", Email = "admin@example.com", IsEmailConfirmed = true, Role = "Admin" });
-        _users.Add(new User { Id = 2, Name = "User", Password = "123", Email = "user@example.com", IsEmailConfirmed = false, Role = "User" });
+        _context = context;
     }
 
-    public IEnumerable<User> GetAllUsers() => _users;
+    public IEnumerable<Acccount> GetAllUsers()
+    {
+        return _context.Acccounts.ToList();
+    }
 
-    public User GetUserById(int id) => _users.FirstOrDefault(u => u.Id == id);
+    public Acccount GetUserById(int id)
+    {
+        // Find a user by their ID
+        var account = _context.Acccounts.FirstOrDefault(a => a.Id == id);
+        if (account != null)
+        {
+            return new Acccount
+            {
+                Id = account.Id,
+                Name = account.Name,
+                Email = account.Email,
+                Password = account.Password,
+                IsComfirmEmail = account.IsComfirmEmail,
+                Role = account.Role
+            };
+        }
+        return null;
+    }
 
     public void UpdateEmail(int id, string newEmail)
     {
-        var user = GetUserById(id);
+        // Update user email in the database
+        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
         if (user != null)
         {
             user.Email = newEmail;
-            user.IsEmailConfirmed = false; 
+            user.IsComfirmEmail = false; // Reset email confirmation status
+            _context.SaveChanges();
         }
     }
 
     public void ConfirmEmail(int id)
     {
-        var user = GetUserById(id);
+        // Confirm user's email
+        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
         if (user != null)
         {
-            user.IsEmailConfirmed = true;
+            user.IsComfirmEmail = true; // Set email as confirmed
+            _context.SaveChanges();
         }
     }
 
     public void DeleteUser(int id)
     {
-        var user = GetUserById(id);
+        // Delete user from the database
+        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
         if (user != null)
         {
-            _users.Remove(user);
+            _context.Acccounts.Remove(user);
+            _context.SaveChanges();
         }
     }
 
-    public User Login(string email, string password)
+    public Acccount Login(string email, string password)
     {
-        _currentUser = _users.FirstOrDefault(u => u.Email == email && u.Password==password); // Mật khẩu giả lập
+        // Authenticate user by email and password
+        var account = _context.Acccounts.FirstOrDefault(u => u.Email == email && u.Password == password);
+        if (account != null)
+        {
+            _currentUser = new Acccount
+            {
+                Id = account.Id,
+                Name = account.Name,
+                Email = account.Email,
+                Role = account.Role,
+                IsComfirmEmail = account.IsComfirmEmail // Reflect confirmation status on login
+            };
+        }
         return _currentUser;
     }
 
-    public User GetCurrentUser() => _currentUser;
+    public Acccount GetCurrentUser() => _currentUser;
 }

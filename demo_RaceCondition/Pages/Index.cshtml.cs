@@ -54,7 +54,7 @@ namespace demo_RaceCondition.Pages
             {
                 Port = 587,
                 Credentials = new NetworkCredential("hieunguyenhuy2001@gmail.com", "urhefuvllahpqqdd"),
-                EnableSsl = true, 
+                EnableSsl = true,
             };
 
             var mailMessage = new MailMessage
