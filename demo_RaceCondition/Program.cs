@@ -10,6 +10,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true; // Bảo mật cookie
     options.Cookie.IsEssential = true; // Cookie bắt buộc cho session
 });
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

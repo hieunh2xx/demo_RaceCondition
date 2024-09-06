@@ -8,7 +8,7 @@ services:
       - "8080:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=myapp_db;User=sa;Password=s7venking2001.
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=demo_bypass;User=sa;Password=s7venking2001.
     depends_on:
       - db
 
