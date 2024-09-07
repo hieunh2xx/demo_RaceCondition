@@ -1,3 +1,4 @@
+using demo_RaceCondition.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -7,17 +8,21 @@ namespace demo_RaceCondition.Pages
     {
         private readonly UserService _userService;
 
+        private readonly demo_bypassContext _demo_bypassContext;
+
+
         private const int timeLoginLimit = 10;
 
-        public LoginModel(UserService userService)
-        {
-            _userService = userService;
-        }
-
         [BindProperty]
-        public string Email { get; set; }
+        public string? Email { get; set; }
         [BindProperty]
         public string Password { get; set; }
+
+        public LoginModel(demo_bypassContext demo_bypassContext)
+        {
+            _userService = new UserService(demo_bypassContext);
+        }
+
         public IActionResult OnPost()
         {
             var user = _userService.Login(Email, Password);
@@ -28,8 +33,6 @@ namespace demo_RaceCondition.Pages
                 return Page();
             }
 
-            HttpContext.Session.Remove("LoginTimeAttemp");
-            HttpContext.Session.Remove("StartTime");
             HttpContext.Session.SetInt32("CurrentUserId", user.Id);
             HttpContext.Session.SetString("CurrentUserName", user.Name.ToString());
 

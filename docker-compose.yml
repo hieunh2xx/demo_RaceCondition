@@ -8,7 +8,7 @@ services:
       - "8080:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=demo_bypass;User=sa;Password=s7venking2001.
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=demo_bypass;User=sa;Password=s7venking2001;Trust
     depends_on:
       - db
 
@@ -21,6 +21,12 @@ services:
       - "1433:1433"
     volumes:
       - mssql_data:/var/opt/mssql
+      - ./demo_bypass.sql:/tmp/mssql-init.sql
+    command: 
+      /bin/bash -c 
+      /opt/mssql/bin/sqlservr & 
+      sleep 30s && 
+      /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P s7venking2001. -d master -i /tmp/mssql-init.sql
 
 volumes:
   mssql_data:
