@@ -15,23 +15,12 @@ public class UserService
         return _context.Acccounts.ToList();
     }
 
-    public Acccount GetUserById(int id)
+    public Acccount? GetUserById(int id)
     {
         // Find a user by their ID
         var account = _context.Acccounts.FirstOrDefault(a => a.Id == id);
-        if (account != null)
-        {
-            return new Acccount
-            {
-                Id = account.Id,
-                Name = account.Name,
-                Email = account.Email,
-                Password = account.Password,
-                IsComfirmEmail = account.IsComfirmEmail,
-                Role = account.Role
-            };
-        }
-        return null;
+
+        return account;
     }
 
     public void UpdateEmail(int id, string newEmail)
