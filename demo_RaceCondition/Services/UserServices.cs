@@ -3,7 +3,8 @@
 public class UserService
 {
     private readonly demo_bypassContext _context;
-    private Acccount _currentUser;
+
+    private Acccount? _currentUser;
 
     public UserService(demo_bypassContext context)
     {
@@ -26,7 +27,7 @@ public class UserService
     public void UpdateEmail(int id, string newEmail)
     {
         // Update user email in the database
-        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
+        var user = GetUserById(id);
         if (user != null)
         {
             user.Email = newEmail;
@@ -38,7 +39,7 @@ public class UserService
     public void ConfirmEmail(int id)
     {
         // Confirm user's email
-        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
+        var user = GetUserById(id);
         if (user != null)
         {
             user.IsComfirmEmail = true; // Set email as confirmed
@@ -49,7 +50,7 @@ public class UserService
     public void DeleteUser(int id)
     {
         // Delete user from the database
-        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
+        var user = GetUserById(id);
         if (user != null)
         {
             _context.Acccounts.Remove(user);
@@ -57,7 +58,7 @@ public class UserService
         }
     }
 
-    public Acccount Login(string email, string password)
+    public Acccount? Login(string email, string password)
     {
         // Authenticate user by email and password
         var account = _context.Acccounts.FirstOrDefault(u => u.Email == email && u.Password == password);
@@ -75,5 +76,5 @@ public class UserService
         return _currentUser;
     }
 
-    public Acccount GetCurrentUser() => _currentUser;
+    public Acccount? GetCurrentUser() => _currentUser;
 }

@@ -14,7 +14,7 @@ namespace demo_RaceCondition.Pages
         private const int timeLoginLimit = 10;
 
         [BindProperty]
-        public string? Email { get; set; }
+        public string Email { get; set; }
         [BindProperty]
         public string Password { get; set; }
 
