@@ -1,55 +1,90 @@
-﻿// Services/UserService.cs
-using demo_RaceCondition.Models;
+﻿using demo_RaceCondition.Models;
 
 public class UserService
 {
-    private demo_bypassContext _bypassContext { get; set; }
+    private readonly demo_bypassContext _context;
+    private Acccount _currentUser;
 
-    public UserService(demo_bypassContext bypassContext)
+    public UserService(demo_bypassContext context)
     {
-        _bypassContext = bypassContext;
+        _context = context;
     }
 
+    public IEnumerable<Acccount> GetAllUsers()
+    {
+        return _context.Acccounts.ToList();
+    }
+
+    public Acccount GetUserById(int id)
+    {
+        // Find a user by their ID
+        var account = _context.Acccounts.FirstOrDefault(a => a.Id == id);
+        if (account != null)
+        {
+            return new Acccount
+            {
+                Id = account.Id,
+                Name = account.Name,
+                Email = account.Email,
+                Password = account.Password,
+                IsComfirmEmail = account.IsComfirmEmail,
+                Role = account.Role
+            };
+        }
+        return null;
+    }
 
     public void UpdateEmail(int id, string newEmail)
     {
-        var user = _bypassContext.Acccounts.FirstOrDefault(a => a.Id == id);
+        // Update user email in the database
+        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
         if (user != null)
         {
             user.Email = newEmail;
-            user.IsComfirmEmail = false;
+            user.IsComfirmEmail = false; // Reset email confirmation status
+            _context.SaveChanges();
         }
     }
 
     public void ConfirmEmail(int id)
     {
-        var user = GetUserById(id);
+        // Confirm user's email
+        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
         if (user != null)
         {
-            user.IsComfirmEmail = true;
+            user.IsComfirmEmail = true; // Set email as confirmed
+            _context.SaveChanges();
         }
-    }
-
-    private Acccount? GetUserById(int id)
-    {
-        var user = _bypassContext.Acccounts.FirstOrDefault(a => a.Id == id);
-        return user;
     }
 
     public void DeleteUser(int id)
     {
-        var user = GetUserById(id);
+        // Delete user from the database
+        var user = _context.Acccounts.FirstOrDefault(u => u.Id == id);
         if (user != null)
         {
-            _bypassContext.Acccounts.Remove(user);
+            _context.Acccounts.Remove(user);
+            _context.SaveChanges();
         }
     }
 
-    public Acccount? Login(string? email, string? password)
+    public Acccount Login(string email, string password)
     {
-        var user = _bypassContext.Acccounts.FirstOrDefault(u => u.Email == email && u.Password == password);
-        if (user != null)
-            user.Password = null;
-        return user;
+        // Authenticate user by email and password
+        var account = _context.Acccounts.FirstOrDefault(u => u.Email == email && u.Password == password);
+        if (account != null)
+        {
+            _currentUser = new Acccount
+            {
+                Id = account.Id,
+                Name = account.Name,
+                Email = account.Email,
+                Role = account.Role,
+                IsComfirmEmail = account.IsComfirmEmail // Reflect confirmation status on login
+            };
+        }
+        return _currentUser;
     }
+
+    public Acccount GetCurrentUser() => _currentUser;
 }
